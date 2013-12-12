@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 
 """
-USAGE :
+DONE :
  * (LEFT) CLICK on background : create a new textbox
  * CTRL + click down and motion :  easy move (like in Google Maps) 
  * CTRL + = : ZOOM +  / CTRL + - : ZOOM -
  * ALT + RIGHT click on a Textbox : DELETE it   
- * Save to XML, and ability to recover after app restart 
+ * Save/read to/from XML 
+ * If Entry has no text, destroy it from the Entry list   
 
 TODO :
- * Slow when too much zooming : redraw() should only draw visible text (Hide the rest? Or move after the windows) 
- * If Entry has no text, destroy it from the Entry list 
  * Add a "Redimension / move"  Entry feature   
  * GoogleMaps-like  Zoom + / -  and N, S, E, W arrows
  * Replace "Entry" widget by "Text" widget (multiline)  => needs to auto-dimension the widget while typing text
@@ -30,7 +29,7 @@ b1pressed = False
 xold = 0
 yold = 0
 
-class Texte(Tk.Entry):
+class Texte(Tk.Entry):        #subclass of Entry
     def __init__(self, event=None, x=None, y=None, size=None, txt=None, *args, **kwargs):
         Tk.Entry.__init__(self, master=c, bd=0, *args, **kwargs)
         if event != None:
@@ -45,11 +44,23 @@ class Texte(Tk.Entry):
         self.focus_force()
         self.bind("<Return>", lambda e: root.focus_force() )
         self.bind("<Alt-Button-3>", lambda event: self.destroy())
+        self.bind("<FocusOut>", lambda event: self.destroyifempty())
         self.draw()
         
+    def destroyifempty(self):
+        if self.get() == '':
+            self.destroy()
+        
     def draw(self):
-        self.place(x=int((self.x-currentx)/currentzoom*X),y=int((self.y-currenty)/currentzoom*Y))
+        newx = int((self.x-currentx)/currentzoom*X)
+        newy = int((self.y-currenty)/currentzoom*Y)
         displaysize = int(self.size/currentzoom)
+        if newx > 2*X or newx < - 2*X or newy > 2*Y or newy < - 2*Y:  # out of the display window, ideally we should hide these widgets! 
+           displaysize = 1                 
+           self.place(x=2*X,y=2*Y)
+        else:
+           self.place(x=newx,y=newy)
+        
         if displaysize < 1:
           displaysize = 1
         self.config(font=("Helvetica Neue LT Com 55 Roman",displaysize))

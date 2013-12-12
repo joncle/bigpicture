@@ -12,7 +12,8 @@
 # 4/ GoogleMaps-like  Zoom + / -  and N, S, E, W arrows
 # 5/ Replace "Entry" widget by "Text" widget (multiline)  => needs to auto-dimension the widget while typing text
 
-import Tkinter as Tk 
+import Tkinter as Tk
+import time 
 from xml.dom import minidom
 
 currentx=0.
@@ -40,6 +41,7 @@ class Texte:
         
         self.entry.focus_force()
         self.entry.bind("<Return>", lambda e: root.focus_force() )
+        self.entry.bind("<Alt-Button-3>", lambda e: self.entry.destroy() )
         self.draw()
         
     def draw(self):
@@ -47,8 +49,10 @@ class Texte:
         displaysize = int(self.size/currentzoom)
         if displaysize < 1:
           displaysize = 1
-        self.entry.config(font=("Purisa",displaysize))
-       
+        self.entry.config(font=("Arial",displaysize))
+        
+    def delete(self):
+        self.entry.destroy()
   
 # Redraw all textboxes
 def redraw():
@@ -59,6 +63,10 @@ def writexml():
     doc = minidom.Document()
     base = doc.createElement('BigPicture')
     doc.appendChild(base)
+    general = doc.createElement('General'); base.appendChild(general)
+    gx = doc.createElement('Currentx'); general.appendChild(gx); gx.appendChild(doc.createTextNode(str(currentx)))
+    gy = doc.createElement('Currenty'); general.appendChild(gy); gy.appendChild(doc.createTextNode(str(currenty)))
+    gz = doc.createElement('Currentzoom'); general.appendChild(gz); gz.appendChild(doc.createTextNode(str(currentzoom)))
     for e in L:
         item = doc.createElement('Item'); base.appendChild(item)
         text = doc.createElement('Text'); item.appendChild(text); text.appendChild(doc.createTextNode(e.entry.get()))
@@ -69,25 +77,38 @@ def writexml():
     doc.unlink()
     
 def readxml():
+    global currentx, currenty, currentzoom
+    global L
+    if L:
+      for e in L:
+        e.delete()
+    L=[]
+       
     xmldoc = minidom.parse('data.xml')
+    
+    generallist=xmldoc.getElementsByTagName('General')
+    for g in generallist:
+        currentx=float(g.getElementsByTagName('Currentx')[0].firstChild.nodeValue)
+        currenty=float(g.getElementsByTagName('Currenty')[0].firstChild.nodeValue)
+        currentzoom=float(g.getElementsByTagName('Currentzoom')[0].firstChild.nodeValue)
+    
     itemlist = xmldoc.getElementsByTagName('Item') 
-    for s in itemlist :
+    for s in itemlist:
         text=s.getElementsByTagName('Text')[0].firstChild.nodeValue
         x=float(s.getElementsByTagName('x')[0].firstChild.nodeValue)
         y=float(s.getElementsByTagName('y')[0].firstChild.nodeValue)
         size=float(s.getElementsByTagName('size')[0].firstChild.nodeValue)
         L.append(Texte(x=x,y=y,size=size,txt=text))
         
-        
 def zoomminus():
     global currentzoom, currentx, currenty
     middlex = currentx + currentzoom / 2
     middley = currenty + currentzoom / 2
-    currentzoom *= 2
+    currentzoom *= 1.414
     currentx = middlex - currentzoom / 2
     currenty = middley - currentzoom / 2
     redraw()
-    
+   
 def zoomplus():     
     global currentzoom, currentx, currenty
     a = root.focus_get().winfo_x()
@@ -101,7 +122,7 @@ def zoomplus():
         middlex = currentx + currentzoom / 2
         middley = currenty + currentzoom / 2
     
-    currentzoom /= 2
+    currentzoom /= 1.414
     currentx = middlex - currentzoom / 2
     currenty = middley - currentzoom / 2
     redraw()

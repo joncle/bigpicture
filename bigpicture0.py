@@ -1,4 +1,9 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
+
+# USAGE :
+# * CLICK on background : create a new textbox
+# * CTRL + click down and motion :  easy move (like in Google Maps) 
+# * CTRL + = : ZOOM +  / CTRL + - : ZOOM -  
 
 # TODO :
 # 1/ If Entry has no text, destroy it from the Entry list 
@@ -14,13 +19,15 @@ currenty=0.
 currentzoom=1.
 X=1000.  # default window width
 Y=500.   # default window height
-
 L=[]     # list containing entries (called "Texte" object)
+b1pressed = False
+xold = 0
+yold = 0
 
 class Texte:
     def __init__(self, event):
-        self.entry = Tk.Entry(root,bd=0,font=("Purisa",int(15)))
-        self.size = 15 * currentzoom
+        self.entry = Tk.Entry(root, bd=0)
+        self.size = 16 * currentzoom
         self.x = currentx + event.x / X * currentzoom
         self.y = currenty + event.y / Y * currentzoom
         self.entry.focus_force()
@@ -62,8 +69,8 @@ def zoomplus():
         middley = currenty + currentzoom / 2
     
     currentzoom /= 2
-    currentx = middlex - currentzoom /2
-    currenty = middley - currentzoom /2
+    currentx = middlex - currentzoom / 2
+    currenty = middley - currentzoom / 2
     redraw()
 
     
@@ -91,6 +98,27 @@ def movedown():
 def b1down(event):
     L.append(Texte(event))
     
+    
+# CTRL + click + move allows moving N, S, E, W  (easier than using arrows)    
+def ctrlb1down(event):
+    global b1pressed, xold, yold
+    b1pressed = True
+    xold = event.x
+    yold = event.y
+    
+def ctrlb1up(event):
+    global b1pressed
+    b1pressed = False
+    
+def motion(event):
+    global currentzoom, currentx, currenty, xold, yold
+    if b1pressed:
+        currentx += (xold - event.x) / X * currentzoom
+        currenty += (yold - event.y) / Y * currentzoom
+        xold = event.x
+        yold = event.y
+        redraw() 
+    
 # Main
 root = Tk.Tk()
 root.title("BigPicture v0.1")
@@ -114,6 +142,9 @@ Tk.Button(c, text = "Down",command=movedown).place(x=10,y=160)
 c.bind("<ButtonPress-1>", b1down)
 root.bind('<Control-=>', lambda e: zoomplus())   # CTRL + PLUS on my french keyboard
 root.bind('<Control-minus>', lambda e: zoomminus())       # CTRL + MINUS on my french keyboard
+c.bind("<Motion>", motion)
+c.bind("<Control-ButtonPress-1>", ctrlb1down)
+c.bind("<Control-ButtonRelease-1>", ctrlb1up)
 
 # Main loop 
 root.mainloop()

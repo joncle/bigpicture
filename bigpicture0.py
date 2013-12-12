@@ -7,7 +7,7 @@
 # 4/ GoogleMaps-like  Zoom + / -  and N, S, E, W arrows
 # 5/ Replace "Entry" widget by "Text" widget (multiline)  => needs to auto-dimension the widget while typing text
 
-from Tkinter import *
+import Tkinter as Tk 
 
 currentx=0.
 currenty=0.
@@ -19,7 +19,7 @@ L=[]     # list containing entries (called "Texte" object)
 
 class Texte:
     def __init__(self, event):
-        self.entry = Entry(root,bd=0,font=("Purisa",int(15)))
+        self.entry = Tk.Entry(root,bd=0,font=("Purisa",int(15)))
         self.size = 15 * currentzoom
         self.x = currentx + event.x / X * currentzoom
         self.y = currenty + event.y / Y * currentzoom
@@ -67,46 +67,48 @@ def zoomplus():
     redraw()
 
     
-def leftb():
+def moveleft():
     global currentx
     currentx -= 0.1 * currentzoom
     redraw()
 
-def rightb():
+def moveright():
     global currentx
     currentx += 0.1 * currentzoom
     redraw()
     
-def upb():
+def moveup():
     global currenty
     currenty -= 0.1 * currentzoom
     redraw()
     
-def downb():
+def movedown():
     global currenty
     currenty += 0.1 * currentzoom
     redraw()
 
+# Create a new text entry
 def b1down(event):
     L.append(Texte(event))
     
 # Main
-root = Tk()
+root = Tk.Tk()
+root.title("BigPicture v0.1")
 root.geometry("1000x500")
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
-c = Canvas(root)
+c = Tk.Canvas(root)
 c.configure(background='white')
-c.grid(sticky=N+E+S+W)
+c.grid(sticky='NESW')
 
 
 # Navigation buttons
-Button(c, text = "Zoom -",command=zoomminus).place(x=10,y=10)
-Button(c, text = "Zoom +",command=zoomplus).place(x=10,y=40)
-Button(c, text = "Left",command=leftb).place(x=10,y=70)
-Button(c, text = "Right",command=rightb).place(x=10,y=100)
-Button(c, text = "Up",command=upb).place(x=10,y=130)
-Button(c, text = "Bottom",command=downb).place(x=10,y=160)
+Tk.Button(c, text = "Zoom -",command=zoomminus).place(x=10,y=10)
+Tk.Button(c, text = "Zoom +",command=zoomplus).place(x=10,y=40)
+Tk.Button(c, text = "Left",command=moveleft).place(x=10,y=70)
+Tk.Button(c, text = "Right",command=moveright).place(x=10,y=100)
+Tk.Button(c, text = "Up",command=moveup).place(x=10,y=130)
+Tk.Button(c, text = "Down",command=movedown).place(x=10,y=160)
 
 # Keyboard and mouse event bindings
 c.bind("<ButtonPress-1>", b1down)

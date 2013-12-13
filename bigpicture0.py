@@ -4,7 +4,9 @@
 DONE :
  * (LEFT) CLICK on background : create a new textbox
  * CTRL + click down and motion :  easy move (like in Google Maps) 
- * CTRL + = : ZOOM +  / CTRL + - : ZOOM -
+ * CTRL + = : ZOOM
+ * CTRL + ) or  CTRL + - : ZOOM -   
+ * CTRL + à  : ZOOM on widget   
  * ALT + RIGHT click on a Textbox : DELETE it   
  * Save/read to/from XML 
  * If Entry has no text, destroy it from the Entry list   
@@ -12,19 +14,19 @@ DONE :
 TODO :
  * Add a "Redimension / move"  Entry feature   
  * GoogleMaps-like  Zoom + / -  and N, S, E, W arrows
- * Replace "Entry" widget by "Text" widget (multiline)  => needs to auto-dimension the widget while typing text
+ * Replace "Entry" widget by "Text" widget (multiline)  => needs to auto-dimension the widget while typing text => needs proper counting of lines
+ * Replace X, Y by root.winfo_width(),  but then initialization of the widgets must be done ONCE mainloop has started 
  * Unicode support 
 """ 
 
 import Tkinter as Tk
+from PIL import Image, ImageTk
 from xml.dom import minidom
 
 coef = 1.732    # sqrt(3)
 currentx=0.
 currenty=0.
 currentzoom=1.
-X=1100.  # default window width
-Y=600.   # default window height
 b1pressed = False
 xold = 0
 yold = 0
@@ -89,11 +91,10 @@ def writexml():
     
 def readxml():
     global currentx, currenty, currentzoom
+    for e in c.children.values():
+        e.destroy()
     try:
-        for e in c.children.values():
-            e.destroy()
         xmldoc = minidom.parse('data.xml')
-        
         generallist=xmldoc.getElementsByTagName('General')
         for g in generallist:
             currentx=float(g.getElementsByTagName('Currentx')[0].firstChild.nodeValue)
@@ -102,14 +103,17 @@ def readxml():
         
         itemlist = xmldoc.getElementsByTagName('Item') 
         for s in itemlist:
-            text=s.getElementsByTagName('Text')[0].firstChild.nodeValue
-            x=float(s.getElementsByTagName('x')[0].firstChild.nodeValue)
-            y=float(s.getElementsByTagName('y')[0].firstChild.nodeValue)
-            size=float(s.getElementsByTagName('size')[0].firstChild.nodeValue)
-            Texte(x=x,y=y,size=size,txt=text)
+            try:
+              text=s.getElementsByTagName('Text')[0].firstChild.nodeValue
+              x=float(s.getElementsByTagName('x')[0].firstChild.nodeValue)
+              y=float(s.getElementsByTagName('y')[0].firstChild.nodeValue)
+              size=float(s.getElementsByTagName('size')[0].firstChild.nodeValue)
+              Texte(x=x,y=y,size=size,txt=text)
+            except:
+              pass
     except:
         pass
-        
+              
 def zoomminus():
     global currentzoom, currentx, currenty
     middlex = currentx + currentzoom / 2
@@ -121,23 +125,24 @@ def zoomminus():
    
 def zoomplus():     
     global currentzoom, currentx, currenty
+    middlex = currentx + currentzoom / 2
+    middley = currenty + currentzoom / 2
+    currentzoom /= coef
+    currentx = middlex - currentzoom / 2
+    currenty = middley - currentzoom / 2
+    redraw()
+    
+def zoomonwidget():
+    global currentzoom, currentx, currenty
     a = c.focus_get().winfo_x()
     b = c.focus_get().winfo_y()
-    # here test if an entry has focus or not , doesn't work after one entry has been deleted
-    # if some widget has focus, we zoom so that this widget is the "centre" of the new zoomed window 
-    if a > 0 and b > 0:         
-        middlex = currentx + a / X * currentzoom
-        middley = currenty + b / Y * currentzoom
-    else:
-        middlex = currentx + currentzoom / 2
-        middley = currenty + currentzoom / 2
-    
+    middlex = currentx + a / X * currentzoom
+    middley = currenty + b / Y * currentzoom
     currentzoom /= coef
     currentx = middlex - currentzoom / 2
     currenty = middley - currentzoom / 2
     redraw()
 
-    
 def moveleft():
     global currentx
     currentx -= 0.1 * currentzoom
@@ -166,7 +171,7 @@ def ctrlb1down(event):
 def ctrlb1up(event):
     global b1pressed
     b1pressed = False
-    
+   
 def motion(event):
     global currentzoom, currentx, currenty, xold, yold
     if b1pressed:
@@ -185,24 +190,44 @@ c = Tk.Frame(root)
 c.configure(background='white')
 c.grid(sticky='NESW')
 
+X=1100.  # default window width,  another solution : X = lambda: 1100. #float(root.winfo_width()) but this is not accessible before mainloop  
+Y=600.   # default window height, another solution : Y = lambda: 600. #float(root.winfo_height())    => objects creation should not be done *before mainloop*
+
+canvas = Tk.Canvas(root)
+canvas.place(x=0,y=0)
+canvas.configure(background='white')
+width = 40
+height = 40
+image_file = Image.open("buttons.png")
+PIL_image = ImageTk.PhotoImage(image_file.convert("RGBA"))
+canvas_img = canvas.create_image(width,height,image=PIL_image)
+def callback(event):  
+    x=event.x
+    y=event.y
+    if width-9 < x < width+9 and height-24 < y < height-12:
+        moveup()
+    elif width-9 < x < width+9 and height+12 < y < height+24:
+        movedown()
+    elif width+12 < x < width+25 and height-8 < y < height+8:
+        moveright()
+    elif width-25 < x < width-12 and height-8 < y < height+8:
+        moveleft()
+canvas.bind("<Button-1>", callback)
+
 # Navigation buttons
-Tk.Button(root, text = "Zoom -",command=zoomminus).place(x=10,y=10)
-Tk.Button(root, text = "Zoom +",command=zoomplus).place(x=10,y=40)
-Tk.Button(root, text = "Left",command=moveleft).place(x=10,y=70)
-Tk.Button(root, text = "Right",command=moveright).place(x=10,y=100)
-Tk.Button(root, text = "Up",command=moveup).place(x=10,y=130)
-Tk.Button(root, text = "Down",command=movedown).place(x=10,y=160)
-Tk.Button(root, text = "Save file",command=writexml).place(x=10,y=190)
-Tk.Button(root, text = "Read file",command=readxml).place(x=10,y=220)
+Tk.Button(root, text = "Zoom -",command=zoomminus).place(x=10,y=110)
+Tk.Button(root, text = "Zoom +",command=zoomplus).place(x=10,y=140)
 
 def quit():
     writexml()
     root.destroy()
 
 # Keyboard and mouse event bindings
-c.bind("<ButtonPress-1>", lambda e: Texte(event=e))       # CLICK => new Entry
-root.bind('<Control-=>', lambda e: zoomplus())            # CTRL + PLUS on my french keyboard
-root.bind('<Control-minus>', lambda e: zoomminus())       # CTRL + MINUS on my french keyboard
+c.bind("<ButtonPress-1>", lambda e: Texte(event=e))       
+root.bind('<Control-=>', lambda e: zoomplus())
+root.bind('<Control-)>', lambda e: zoomminus())            
+root.bind('<Control-minus>', lambda e: zoomminus())
+root.bind('<Control-à>', lambda e: zoomonwidget())
 c.bind("<Motion>", motion)
 c.bind("<Control-ButtonPress-1>", ctrlb1down)
 c.bind("<Control-ButtonRelease-1>", ctrlb1up)

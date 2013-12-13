@@ -9,11 +9,11 @@ DONE :
  * CTRL + à  : ZOOM on widget   
  * ALT + RIGHT click on a Textbox : DELETE it   
  * Save/read to/from XML 
- * If Entry has no text, destroy it from the Entry list   
+ * If Entry has no text, destroy it from the Entry list
+ * GoogleMaps-like  Zoom + / -  and N, S, E, W arrows    
 
 TODO :
  * Add a "Redimension / move"  Entry feature   
- * GoogleMaps-like  Zoom + / -  and N, S, E, W arrows
  * Replace "Entry" widget by "Text" widget (multiline)  => needs to auto-dimension the widget while typing text => needs proper counting of lines
  * Replace X, Y by root.winfo_width(),  but then initialization of the widgets must be done ONCE mainloop has started 
  * Unicode support 
@@ -194,11 +194,11 @@ X=1100.  # default window width,  another solution : X = lambda: 1100. #float(ro
 Y=600.   # default window height, another solution : Y = lambda: 600. #float(root.winfo_height())    => objects creation should not be done *before mainloop*
 
 # Navigation buttons
-canvas = Tk.Canvas(root)
-canvas.place(x=10,y=10)
-canvas.configure(background='white')
 image_file = Image.open("buttons.png")
 PIL_image = ImageTk.PhotoImage(image_file.convert("RGBA"))
+canvas = Tk.Canvas(root, width = image_file.size[0], height = image_file.size[1])
+canvas.place(x=10,y=10)
+canvas.configure(background='white', bd=0)
 canvas_img = canvas.create_image(0,0,anchor=Tk.NW, image=PIL_image)
 def callback(event):  
     x=event.x

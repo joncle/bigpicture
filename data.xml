@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+<BigPicture>
+  <General>
+    <Currentx>0.155360387203</Currentx>
+    <Currenty>0.0920538449367</Currenty>
+    <Currentzoom>0.577367205543</Currentzoom>
+  </General>
+  <Item>
+    <Text>Test</Text>
+    <x>0.343636363636</x>
+    <y>0.301666666667</y>
+    <size>20.0</size>
+  </Item>
+  <Item>
+    <Text>Test #2</Text>
+    <x>0.240915709479</x>
+    <y>0.155564237546</y>
+    <size>11.5473441109</size>
+  </Item>
+  <Item>
+    <Text>hello you</Text>
+    <x>0.35423387263</x>
+    <y>0.292765620027</y>
+    <size>6.66705780072</size>
+  </Item>
+</BigPicture>

@@ -30,6 +30,7 @@ class Texte(Tk.Text):        #subclass of Text
         self.bind("<FocusOut>", lambda event: self.destroyifempty())
         self.bind("<Control-B1-Motion>", motion)
         self.bind("<Control-ButtonPress-1>", ctrlb1down)
+        self.bind("<MouseWheel>", scrollwheel)
 
         #self.bind("<Alt-ButtonPress-1>", lambda event: altb1down(event,self))
         #self.bind("<ButtonRelease-1>", b1up)
@@ -177,6 +178,12 @@ def zoombuttonsclick(event):
     elif 10 < x < 10+12 and 22 < y < 22+24:  moveleft()
     elif 23 < x < 42 and 68 < y < 86: zoomplus()
     elif 23 < x < 42 and 88 < y < 107: zoomminus()
+    
+def scrollwheel(event):
+    if event.delta > 0:
+        zoomplus()
+    else:
+        zoomminus()
 
 #########################################
 # MOVE
@@ -246,7 +253,8 @@ canvas_img = canvas.create_image(0,0,anchor=Tk.NW, image=PIL_image)
 
 # Keyboard and mouse event bindings
 canvas.bind("<Button-1>", zoombuttonsclick)
-c.bind("<ButtonPress-1>", lambda e: Texte(event=e))       
+c.bind("<ButtonPress-1>", lambda e: Texte(event=e))
+c.bind("<MouseWheel>", scrollwheel)       
 root.bind('<Control-=>', lambda e: zoomplus())
 root.bind('<Control-)>', lambda e: zoomminus())            
 root.bind('<Control-minus>', lambda e: zoomminus())

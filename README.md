@@ -9,9 +9,12 @@ in various situations in order to have a wider view first, and look at
 details in a second time.
 
  USAGE :
- * CLICK on background : create a new textbox
- * CTRL + click down and motion : easy move (like in Google Maps)
- * CTRL + = : ZOOM + / CTRL + - : ZOOM - 
+ * CLICK : New text
+ * ALT+RIGHT CLICK : Delete text
+ * CTRL+CLICK+MOVE : Move displayed area
+ * CTRL+=  : Zoom +
+ * CTRL+- : Zoom -
+ * CTRL+à : Zoom on widget  
 
-<img src="https://dl.dropboxusercontent.com/u/83031018/Capture.JPG">
+<img src="https://github.com/basjo/bigpicture/blob/master/screenshot.jpg">
 

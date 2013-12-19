@@ -1,26 +1,135 @@
 <?xml version="1.0" ?>
 <BigPicture>
   <General>
-    <Currentx>0.155360387203</Currentx>
-    <Currenty>0.0920538449367</Currenty>
-    <Currentzoom>0.577367205543</Currentzoom>
+    <Currentx>-0.143605054065</Currentx>
+    <Currenty>-0.0195243409809</Currenty>
+    <Currentzoom>1.732</Currentzoom>
   </General>
   <Item>
-    <Text>Test</Text>
-    <x>0.343636363636</x>
-    <y>0.301666666667</y>
-    <size>20.0</size>
+    <Text>topographic?</Text>
+    <x>0.157131012602</x>
+    <y>0.495047540922</y>
+    <size>6.66705780072</size>
   </Item>
   <Item>
-    <Text>Test #2</Text>
-    <x>0.240915709479</x>
-    <y>0.155564237546</y>
+    <Text>Project 1</Text>
+    <x>0.115810909091</x>
+    <y>0.831966666667</y>
+    <size>34.64</size>
+  </Item>
+  <Item>
+    <Text>Sometimes it is important to have
+a *wide* view first, and dive into 
+details then.
+In your projects, can you see the big picture ?</Text>
+    <x>0.600824870125</x>
+    <y>0.445217496506</y>
     <size>11.5473441109</size>
   </Item>
   <Item>
-    <Text>hello you</Text>
-    <x>0.35423387263</x>
-    <y>0.292765620027</y>
+    <Text>is a map text editor</Text>
+    <x>0.0980036363636</x>
+    <y>0.434826666667</y>
+    <size>20.0</size>
+  </Item>
+  <Item>
+    <Text>Home</Text>
+    <x>0.882614545455</x>
+    <y>1.29672</y>
+    <size>34.64</size>
+  </Item>
+  <Item>
+    <Text>Keyboard shortcuts</Text>
+    <x>1.03534545455</x>
+    <y>0.702066666667</y>
+    <size>34.64</size>
+  </Item>
+  <Item>
+    <Text>Google-Maps like zooming</Text>
+    <x>0.12788239345</x>
+    <y>0.552928883757</y>
+    <size>11.5473441109</size>
+  </Item>
+  <Item>
+    <Text>TODO:</Text>
+    <x>0.579390840059</x>
+    <y>0.987166601106</y>
+    <size>20.0</size>
+  </Item>
+  <Item>
+    <Text>* bread
+* tomatos
+* apples</Text>
+    <x>0.968185010836</x>
+    <y>1.43475969407</y>
     <size>6.66705780072</size>
+  </Item>
+  <Item>
+    <Text>CLICK : New text
+ALT+RIGHT CLICK : Delete text
+CTRL+CLICK+MOVE : Move displayed area
+CTRL+=  : Zoom +
+CTRL+- : Zoom -
+CTRL+à : Zoom on widget</Text>
+    <x>1.03270274432</x>
+    <y>0.803441674239</y>
+    <size>11.5473441109</size>
+  </Item>
+  <Item>
+    <Text>change oil</Text>
+    <x>1.01484231448</x>
+    <y>1.24785141629</y>
+    <size>6.66705780072</size>
+  </Item>
+  <Item>
+    <Text>Project 2</Text>
+    <x>0.57241520967</x>
+    <y>0.877427383982</y>
+    <size>34.64</size>
+  </Item>
+  <Item>
+    <Text>shopping list</Text>
+    <x>0.970868825615</x>
+    <y>1.3940066574</y>
+    <size>11.5473441109</size>
+  </Item>
+  <Item>
+    <Text>repair</Text>
+    <x>1.01514536257</x>
+    <y>1.22729465474</y>
+    <size>6.66705780072</size>
+  </Item>
+  <Item>
+    <Text>small things
+and big things</Text>
+    <x>0.575536126643</x>
+    <y>1.04016121234</y>
+    <size>11.5473441109</size>
+  </Item>
+  <Item>
+    <Text>Big Picture</Text>
+    <x>0.0654899467574</x>
+    <y>0.323021822911</y>
+    <size>34.64</size>
+  </Item>
+  <Item>
+    <Text>Car</Text>
+    <x>1.0065606165</x>
+    <y>1.26409903615</y>
+    <size>11.5473441109</size>
+  </Item>
+  <Item>
+    <Text>Why use it ?</Text>
+    <x>0.610218181817</x>
+    <y>0.338346666667</y>
+    <size>34.64</size>
+  </Item>
+  <Item>
+    <Text>reservation
+Sushi 
+restaurant</Text>
+    <x>0.855929940357</x>
+    <y>1.38957926571</y>
+    <size>11.5473441109</size>
   </Item>
 </BigPicture>

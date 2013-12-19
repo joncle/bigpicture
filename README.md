@@ -16,5 +16,5 @@ details in a second time.
  * CTRL+- : Zoom -
  * CTRL+à : Zoom on widget  
 
-<img src="https://github.com/basjo/bigpicture/blob/master/screenshot.jpg">
+<img src="https://github.com/basjo/bigpicture/blob/master/screenshot.jpg?raw=true">
 

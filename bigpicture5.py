@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import Tkinter as Tk
+import Tkinter as Tk, tkFont, os, sys, tkSimpleDialog
 from PIL import Image, ImageTk
 from xml.dom import minidom
-import tkFont
 
 #########################################
 # TEXTE
@@ -21,28 +20,24 @@ class Texte(Tk.Text):        #subclass of Text
             self.y = y
             self.size = size
             self.insert(Tk.INSERT, txt) 
-            
+
         self.config(undo=True)
-        
+
         self.focus_force()
         
         self.bind("<Alt-Button-3>", lambda event: self.destroy())
         self.bind("<FocusOut>", lambda event: self.destroyifempty())
-        self.bind("<Control-B1-Motion>", motion)
+        self.bind("<Control-B1-Motion>", ctrlmotion)
         self.bind("<Control-ButtonPress-1>", ctrlb1down)
         self.bind("<MouseWheel>", scrollwheel)
-
-        #self.bind("<Alt-ButtonPress-1>", lambda event: altb1down(event,self))
-        #self.bind("<ButtonRelease-1>", b1up)
-        #self.bind("<Motion>", lambda event: motion(event))
-        
+        self.bind("<Alt-B1-Motion>", lambda event: altmotion(event))
+        self.bind("<Alt-ButtonPress-1>", lambda event: altb1down(event,self))
         bindtags = list(self.bindtags())
         bindtags.insert(2, "custom")
         self.bindtags(tuple(bindtags))
         self.bind_class("custom", "<Key>", self.resizebox)
         
-        self.draw()
-        self.resizebox(None)
+        self.draw(resize=True)
         
     def destroyifempty(self):
         if self.get(1.0, "end-1c") == '':
@@ -58,35 +53,67 @@ class Texte(Tk.Text):        #subclass of Text
         for line in self.get(1.0, "end-1c").split("\n"):
             width=max(width,self.font.measure(line))
             lines += 1
+        lines = min(lines,20)          # max 20 lines !
+        if self.displaysize == 1:
+            width = int(width * self.size/currentzoom / 2) + 5
+            lines = int(lines * self.size/currentzoom)
+        else:
+            width += 10
         self.config(height=lines)
-        self.place(width=width+10)
+        self.place(width=width)
         
-    def draw(self, event=None):
+    def draw(self, event=None, resize=False):
         if event:                 # sinon self peut etre n importe quoi!
             self = event.widget
             
         #position   
-        self.displaysize = int(self.size/currentzoom)
+        self.displaysize = int(self.size/currentzoom)   
         newx = int((self.x-currentx)/currentzoom*X())
         newy = int((self.y-currenty)/currentzoom*Y())
-        if newx > 2*X() or newx < - 2*X() or newy > 2*Y() or newy < - 2*Y():  # out of the display window, ideally we should hide these widgets! 
-           self.displaysize = 1        
+        if newx > X() or newx < - 2*X() or newy > Y() or newy < - 2*Y():  # out of the display window, ideally we should hide these widgets! 
+           self.displaysize = 1                 
            newx, newy=2*X(), 2*Y()
+           
         self.place(x=newx, y=newy)
         
         #font           
-        if self.displaysize < 1:
+        if self.displaysize == 0:
           self.displaysize = 1
         self.font = tkFont.Font(family="Helvetica Neue LT Com 55 Roman",size=self.displaysize)
         self.config(font=self.font)
         
+        if resize:
+            self.resizebox()
+        
 # Redraw all textboxes
 def redraw(resize=False):
     for e in c.children.values():
-        e.draw()
-        if resize:
-            e.resizebox()
-
+        e.draw(resize=resize)
+            
+#########################################
+# FIND + FIND NEXT
+#########################################
+matches = None
+from itertools import cycle
+            
+def find(event=None):
+    global matches
+    texttofind = tkSimpleDialog.askstring('Find', 'Find')
+    if not texttofind:
+        return
+    matches = cycle(e for e in c.children.values() if texttofind.lower() in e.get(1.0, "end-1c").lower())
+    findnext(None)
+    
+def findnext(event):
+    if not matches:
+        find()
+    try:
+        e = next(matches)
+        e.focus_force()
+        zoomonwidget(coef=e.size/20/currentzoom)
+    except:
+        pass
+    
 #########################################
 # XML
 #########################################
@@ -104,7 +131,7 @@ def writexml():
         x = doc.createElement('x'); item.appendChild(x); x.appendChild(doc.createTextNode(str(e.x)))
         y = doc.createElement('y'); item.appendChild(y); y.appendChild(doc.createTextNode(str(e.y)))
         size = doc.createElement('size'); item.appendChild(size); size.appendChild(doc.createTextNode(str(e.size)))
-    doc.writexml( open('data.xml', 'w'), indent="", addindent="  ", newl='\n')
+    doc.writexml( open(filename, 'w'), indent="", addindent="  ", newl='\n')
     doc.unlink()
     
 def readxml():
@@ -114,7 +141,7 @@ def readxml():
         e.destroy()
         
     try:
-        xmldoc = minidom.parse('data.xml')
+        xmldoc = minidom.parse(filename)
     except:
         return
         
@@ -136,7 +163,7 @@ def readxml():
           except:
               pass
         
-def quit():
+def quit(event=None):
     writexml()
     root.destroy() 
         
@@ -158,15 +185,11 @@ def zoomminus():
 def zoomplus():
     zoomcoef(1/1.732)
      
-def zoomonwidget():
+def zoomonwidget(coef=1/1.732):
     global currentzoom, currentx, currenty
-    a = c.focus_get().winfo_x()
-    b = c.focus_get().winfo_y() 
-    middlex = currentx + a / X() * currentzoom
-    middley = currenty + b / Y() * currentzoom
-    currentzoom /= 1.732
-    currentx = middlex - currentzoom / 2
-    currenty = middley - currentzoom / 2
+    currentzoom *= coef
+    currentx = c.focus_get().x - currentzoom / 2
+    currenty = c.focus_get().y - currentzoom / 2
     redraw(resize=True)
     
 def zoombuttonsclick(event):  
@@ -210,18 +233,26 @@ def movedown():
   
 def ctrlb1down(event):
     global xold, yold
-    xold, yold = event.x, event.y
+    xold, yold = event.x_root, event.y_root    
    
-#def altb1down(event, e):
-#    global xold, yold, movingtexte
-#    xold, yold = event.x, event.y
-#    movingtexte = e
     
-def motion(event):
+def ctrlmotion(event):
     global currentzoom, currentx, currenty, xold, yold
-    currentx += (xold - event.x) / X() * currentzoom
-    currenty += (yold - event.y) / Y() * currentzoom
-    xold, yold = event.x, event.y
+    currentx += (xold - event.x_root) / X() * currentzoom
+    currenty += (yold - event.y_root) / Y() * currentzoom
+    xold, yold = event.x_root, event.y_root
+    redraw()
+    
+def altb1down(event, e):
+    global xold, yold, movingtexte
+    xold, yold = event.x_root, event.y_root
+    movingtexte = e
+    
+def altmotion(event):
+    global xold, yold
+    movingtexte.x -= (xold - event.x_root) / X() * currentzoom
+    movingtexte.y -= (yold - event.y_root) / Y() * currentzoom
+    xold, yold = event.x_root, event.y_root
     redraw()
       
 #########################################
@@ -232,6 +263,24 @@ root.title("BigPicture")
 root.geometry("1100x600+100+50")
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
+
+# Icon
+iconfile='bigpicture.ico'
+if not os.path.exists(iconfile):
+    import win32api
+    iconfile = win32api.GetModuleFileName(win32api.GetModuleHandle(None))
+try:
+    root.iconbitmap(default=iconfile)
+except:
+    pass
+    
+# Filename    
+try:
+    filename = sys.argv[1]
+except:
+    filename = 'default.bp'
+
+# Main window
 c = Tk.Frame(root)
 c.configure(background='white')
 c.grid(sticky='NESW')
@@ -254,15 +303,18 @@ canvas_img = canvas.create_image(0,0,anchor=Tk.NW, image=PIL_image)
 # Keyboard and mouse event bindings
 canvas.bind("<Button-1>", zoombuttonsclick)
 c.bind("<ButtonPress-1>", lambda e: Texte(event=e))
-c.bind("<MouseWheel>", scrollwheel)       
+c.bind("<MouseWheel>", scrollwheel)
+root.bind('<Control-f>', find)
+root.bind('<F3>', findnext)              
+root.bind('<Control-w>', quit)
 root.bind('<Control-=>', lambda e: zoomplus())
-root.bind('<Control-)>', lambda e: zoomminus())            
+root.bind('<Control-)>', lambda e: zoomminus())
 root.bind('<Control-minus>', lambda e: zoomminus())
 try:              # may not be handled on all keyboards (it works for french keyboards)
     root.bind('<Control-à>', lambda e: zoomonwidget())
 except:
     pass
-c.bind("<Control-B1-Motion>", motion)
+c.bind("<Control-B1-Motion>", ctrlmotion)
 c.bind("<Control-ButtonPress-1>", ctrlb1down)
 root.protocol("WM_DELETE_WINDOW", quit)
 root.after(10, readxml)  # done only 10ms after mainloop() has started, prevents problem with X(), Y() = 1.0 before mainloop()
